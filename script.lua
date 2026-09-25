@@ -1,7 +1,7 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/Library.lua"))()
 
 local Window = Library:CreateWindow({
-    Title = 'CRIME.CC | Da Hood Internal',
+    Title = 'CRIME.CC | Da Hood ESP',
     Center = true,
     AutoShow = true,
     TabPadding = 8,
@@ -9,40 +9,21 @@ local Window = Library:CreateWindow({
 })
 
 local Tabs = {
-    Combat = Window:AddTab('Combat'),
     Visuals = Window:AddTab('Visuals'),
-    Player = Window:AddTab('Player'),
     Settings = Window:AddTab('Settings')
 }
 
--- ==================== COMBAT TAB ====================
-local AimbotGroup = Tabs.Combat:AddLeftGroupbox('Silent Aim / Aimbot')
+-- ==================== VISUALS TAB (ESP) ====================
+local ESPGroup = Tabs.Visuals:AddLeftGroupbox('ESP Settings')
 
-AimbotGroup:AddToggle('AimEnable', {
-    Text = 'Enable Aimbot',
-    Default = false,
-}):AddKeyPicker('AimKey', { Default = 'E', SyncToggleState = false, Mode = 'Hold', Text = 'Aimbot Key', NoUI = false })
-
-AimbotGroup:AddDropdown('TargetPart', {
-    Values = {'Head', 'HumanoidRootPart'},
-    Default = 1,
-    Text = 'Target Part',
-})
-
--- ==================== PLAYER TAB ====================
-local MovementGroup = Tabs.Player:AddLeftGroupbox('Movement & Misc')
-
-MovementGroup:AddToggle('SpeedToggle', {
-    Text = 'Custom WalkSpeed',
+ESPGroup:AddToggle('EspEnabled', {
+    Text = 'Enable Box ESP',
     Default = false,
 })
 
-MovementGroup:AddSlider('SpeedValue', {
-    Text = 'Speed Value',
-    Default = 16,
-    Min = 16,
-    Max = 150,
-    Rounding = 1,
+ESPGroup:AddToggle('EspName', {
+    Text = 'Name Tags',
+    Default = false,
 })
 
 -- ==================== SETTINGS TAB ====================
@@ -58,56 +39,86 @@ MenuSettingsGroup:AddLabel('Menu Keybind'):AddKeyPicker('MenuKeybind', {
     Text = 'Menu Keybind' 
 })
 
--- ==================== LÓGICA REAL DE LOS CHEATS ====================
+-- ==================== LÓGICA DEL ESP ====================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
 
--- Función para encontrar al jugador más cercano al cursor
-local function GetClosestPlayer()
-    local target = nil
-    local shortestDist = math.huge
+local espCache = {}
 
-    for _, v in ipairs(Players:GetPlayers()) do
-        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
-            local part = v.Character:FindFirstChild(Library.Options.TargetPart.Value)
-            if part then
-                local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
-                if onScreen then
-                    local dist = (Vector2.new(mouse.X, mouse.Y) - Vector2.new(screenPos.X, screenPos.Y)).Magnitude
-                    if dist < shortestDist then
-                        shortestDist = dist
-                        target = v
-                    end
-                end
-            end
-        end
+local function removeEsp(player)
+    if espCache[player] then
+        if espCache[player].Box then espCache[player].Box:Remove() end
+        if espCache[player].Name then espCache[player].Name:Remove() end
+        espCache[player] = nil
     end
-    return target
 end
 
--- Hook para el Aimbot / Silent Aim en Da Hood
-local mouse = LocalPlayer:GetMouse()
 RunService.RenderStepped:Connect(function()
-    -- Lógica de WalkSpeed
-    local character = LocalPlayer.Character
-    if character and character:FindFirstChild("Humanoid") then
-        if Library.Toggles.SpeedToggle.Value then
-            character.Humanoid.WalkSpeed = Library.Options.SpeedValue.Value
-        end
-    end
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local character = player.Character
+            local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
+            local humanoid = character and character:FindFirstChild("Humanoid")
 
-    -- Lógica de Aimbot (se activa al mantener presionada la tecla configurada, por defecto 'E')
-    if Library.Toggles.AimEnable.Value and Library.Options.AimKey:GetState() then
-        local targetPlayer = GetClosestPlayer()
-        if targetPlayer and targetPlayer.Character then
-            local targetPart = targetPlayer.Character:FindFirstChild(Library.Options.TargetPart.Value)
-            if targetPart then
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPart.Position)
+            if Library.Toggles.EspEnabled.Value and character and humanoidRootPart and humanoid and humanoid.Health > 0 then
+                if not espCache[player] then
+                    espCache[player] = {
+                        Box = Drawing.new("Square"),
+                        Name = Drawing.new("Text")
+                    }
+                    espCache[player].Box.Visible = false
+                    espCache[player].Box.Thickness = 1
+                    espCache[player].Box.Color = Color3.fromRGB(255, 255, 255)
+                    espCache[player].Box.Filled = false
+
+                    espCache[player].Name.Visible = false
+                    espCache[player].Name.Size = 14
+                    espCache[player].Name.Center = true
+                    espCache[player].Name.Outline = true
+                    espCache[player].Name.Color = Color3.fromRGB(255, 255, 255)
+                end
+
+                local vector, onScreen = Camera:WorldToViewportPoint(humanoidRootPart.Position)
+                if onScreen then
+                    local head = character:FindFirstChild("Head")
+                    local topVector = head and Camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0)) or vector
+                    local legVector = Camera:WorldToViewportPoint(humanoidRootPart.Position - Vector3.new(0, 3, 0))
+                    
+                    local height = math.abs(topVector.Y - legVector.Y)
+                    local width = height / 2
+
+                    -- Dibujar Caja
+                    local box = espCache[player].Box
+                    box.Size = Vector2.new(width, height)
+                    box.Position = Vector2.new(vector.X - width / 2, topVector.Y)
+                    box.Visible = true
+
+                    -- Dibujar Nombre
+                    local name = espCache[player].Name
+                    if Library.Toggles.EspName.Value then
+                        name.Text = player.Name
+                        name.Position = Vector2.new(vector.X, topVector.Y - 18)
+                        name.Visible = true
+                    else
+                        name.Visible = false
+                    end
+                else
+                    if espCache[player] then
+                        espCache[player].Box.Visible = false
+                        espCache[player].Name.Visible = false
+                    end
+                end
+            else
+                removeEsp(player)
             end
         end
     end
 end)
 
-Library:Notify('CRIME.CC Funcional cargado con éxito. Presiona Insert.')
+Players.PlayerRemoving:Connect(function(player)
+    removeEsp(player)
+end)
+
+Library:Notify('CRIME.CC ESP cargado con éxito. Presiona Insert.')
