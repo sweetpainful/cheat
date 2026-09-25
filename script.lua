@@ -1,3 +1,4 @@
+-- ==================== CRIME.CC | DA HOOD INTERNAL ====================
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/Library.lua"))()
 
 local Window = Library:CreateWindow({
@@ -68,7 +69,7 @@ MovementGroup:AddSlider('SpeedValue', {
     Rounding = 1,
 })
 
--- ==================== SETTINGS TAB (DISTRIBUIDO) ====================
+-- ==================== SETTINGS TAB ====================
 local MenuSettingsGroup = Tabs.Settings:AddLeftGroupbox('Menu Customization')
 
 MenuSettingsGroup:AddButton('Unload Script', function()
@@ -129,4 +130,4 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-Library:Notify('CRIME.CC cargado con éxito. Presiona Insert.')
+Library:Notify('CRIME.CC cargado con éxito desde GitHub. Presiona Insert.')
