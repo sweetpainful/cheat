@@ -68,7 +68,7 @@ MovementGroup:AddSlider('SpeedValue', {
     Rounding = 1,
 })
 
--- ==================== SETTINGS TAB ====================
+-- ==================== SETTINGS TAB (DISTRIBUIDO) ====================
 local MenuSettingsGroup = Tabs.Settings:AddLeftGroupbox('Menu Customization')
 
 MenuSettingsGroup:AddButton('Unload Script', function()
@@ -129,4 +129,4 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-Library:Notify('CRIME.CC cargado correctamente desde GitHub. Presiona Insert.')
+Library:Notify('CRIME.CC cargado con éxito. Presiona Insert.')
