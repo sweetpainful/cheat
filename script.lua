@@ -1,4 +1,3 @@
--- ==================== CRIME.CC | DA HOOD INTERNAL ====================
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/Library.lua"))()
 
 local Window = Library:CreateWindow({
@@ -22,7 +21,7 @@ local AimbotGroup = Tabs.Combat:AddLeftGroupbox('Silent Aim / Aimbot')
 AimbotGroup:AddToggle('AimEnable', {
     Text = 'Enable Aimbot',
     Default = false,
-}):AddKeyPicker('AimKey', { Default = 'MouseButton2', SyncToggleState = false, Mode = 'Hold', Text = 'Aimbot', NoUI = false })
+}):AddKeyPicker('AimKey', { Default = 'E', SyncToggleState = false, Mode = 'Hold', Text = 'Aimbot Key', NoUI = false })
 
 AimbotGroup:AddDropdown('TargetPart', {
     Values = {'Head', 'HumanoidRootPart'},
@@ -30,30 +29,7 @@ AimbotGroup:AddDropdown('TargetPart', {
     Text = 'Target Part',
 })
 
-AimbotGroup:AddToggle('WallCheck', {
-    Text = 'Wall Check',
-    Default = true,
-})
-
--- ==================== VISUALS TAB (ESP) ====================
-local ESPGroup = Tabs.Visuals:AddLeftGroupbox('ESP Players')
-
-ESPGroup:AddToggle('EspEnabled', {
-    Text = 'Enable ESP Box',
-    Default = false,
-})
-
-ESPGroup:AddToggle('EspName', {
-    Text = 'Name Tags',
-    Default = false,
-})
-
-ESPGroup:AddToggle('EspHealth', {
-    Text = 'Health Bar',
-    Default = false,
-})
-
--- ==================== PLAYER TAB (MOVIMIENTO) ====================
+-- ==================== PLAYER TAB ====================
 local MovementGroup = Tabs.Player:AddLeftGroupbox('Movement & Misc')
 
 MovementGroup:AddToggle('SpeedToggle', {
@@ -82,52 +58,56 @@ MenuSettingsGroup:AddLabel('Menu Keybind'):AddKeyPicker('MenuKeybind', {
     Text = 'Menu Keybind' 
 })
 
-local BackgroundGroup = Tabs.Settings:AddRightGroupbox('Custom Background')
-
-BackgroundGroup:AddInput('CustomBgID', {
-    Default = '',
-    Numeric = false,
-    Finished = true,
-    Text = 'ID de Imagen (Decal)',
-    Tooltip = 'Introduce el ID de Roblox de la imagen',
-    Placeholder = 'rbxassetid://...',
-})
-
--- Lógica del Fondo Personalizado
-local MainFrame = Window.Holder 
-local BgImage = Instance.new("ImageLabel")
-BgImage.Name = "CustomBackground"
-BgImage.Size = UDim2.new(1, 0, 1, 0)
-BgImage.BackgroundTransparency = 1
-BgImage.ScaleType = Enum.ScaleType.Slice
-BgImage.ZIndex = 0
-BgImage.Parent = MainFrame
-
-Library.Options.CustomBgID:OnChanged(function()
-    local id = Library.Options.CustomBgID.Value
-    if id ~= "" then
-        if not id:find("rbxassetid://") then
-            id = "rbxassetid://" .. id
-        end
-        BgImage.Image = id
-        BgImage.Transparency = 0.3
-    else
-        BgImage.Image = ""
-    end
-end)
-
--- ==================== LOOPS DE LOS CHEATS ====================
-local RunService = game:GetService("RunService")
+-- ==================== LÓGICA REAL DE LOS CHEATS ====================
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
-RunService.Heartbeat:Connect(function()
+-- Función para encontrar al jugador más cercano al cursor
+local function GetClosestPlayer()
+    local target = nil
+    local shortestDist = math.huge
+
+    for _, v in ipairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+            local part = v.Character:FindFirstChild(Library.Options.TargetPart.Value)
+            if part then
+                local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+                if onScreen then
+                    local dist = (Vector2.new(mouse.X, mouse.Y) - Vector2.new(screenPos.X, screenPos.Y)).Magnitude
+                    if dist < shortestDist then
+                        shortestDist = dist
+                        target = v
+                    end
+                end
+            end
+        end
+    end
+    return target
+end
+
+-- Hook para el Aimbot / Silent Aim en Da Hood
+local mouse = LocalPlayer:GetMouse()
+RunService.RenderStepped:Connect(function()
+    -- Lógica de WalkSpeed
     local character = LocalPlayer.Character
     if character and character:FindFirstChild("Humanoid") then
         if Library.Toggles.SpeedToggle.Value then
             character.Humanoid.WalkSpeed = Library.Options.SpeedValue.Value
         end
     end
+
+    -- Lógica de Aimbot (se activa al mantener presionada la tecla configurada, por defecto 'E')
+    if Library.Toggles.AimEnable.Value and Library.Options.AimKey:GetState() then
+        local targetPlayer = GetClosestPlayer()
+        if targetPlayer and targetPlayer.Character then
+            local targetPart = targetPlayer.Character:FindFirstChild(Library.Options.TargetPart.Value)
+            if targetPart then
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPart.Position)
+            end
+        end
+    end
 end)
 
-Library:Notify('CRIME.CC cargado con éxito desde GitHub. Presiona Insert.')
+Library:Notify('CRIME.CC Funcional cargado con éxito. Presiona Insert.')
