@@ -23,7 +23,7 @@ end
 -- =================================================================
 local Config = {
     MenuKey = Enum.KeyCode.Insert,
-    AccentColor = Color3.fromRGB(0, 255, 179),
+    AccentColor = Color3.fromRGB(115, 80, 160),
 
     -- Movement & Misc
     WalkSpeed = 16,
@@ -40,6 +40,11 @@ local Config = {
     RapidFire = false,
     RageBullets = false,
 
+    -- Orbit Settings
+    OrbitEnabled = false,
+    OrbitSpeed = 15,
+    OrbitRadius = 5,
+
     -- Keybinds
     Keys = {
         ESP = Enum.KeyCode.E,
@@ -47,7 +52,8 @@ local Config = {
         Fly = Enum.KeyCode.F,
         Jump = Enum.KeyCode.J,
         Gravity = Enum.KeyCode.G,
-        SpinBot = Enum.KeyCode.Z
+        SpinBot = Enum.KeyCode.Z,
+        Orbit = Enum.KeyCode.X
     },
 
     -- ESP Options
@@ -81,6 +87,7 @@ local Config = {
     Whitelist = {},
     Blacklist = {},
     LockedTarget = nil,
+    OrbitTarget = nil, -- Objetivo fijado para el Orbit automático
     SpectatingPlayer = nil
 }
 
@@ -140,82 +147,88 @@ ScreenGui.ResetOnSpawn = false
 
 local LoginFrame = Instance.new("Frame")
 LoginFrame.Name = "LoginFrame"
-LoginFrame.Size = UDim2.new(0, 380, 0, 220)
-LoginFrame.Position = UDim2.new(0.5, -190, 0.5, -110)
-LoginFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+LoginFrame.Size = UDim2.new(0, 320, 0, 160)
+LoginFrame.Position = UDim2.new(0.5, -160, 0.5, -80)
+LoginFrame.BackgroundColor3 = Color3.fromRGB(22, 20, 28)
 LoginFrame.BorderSizePixel = 0
 LoginFrame.Active = true
 LoginFrame.Draggable = true
 LoginFrame.Parent = ScreenGui
 
-Instance.new("UICorner", LoginFrame).CornerRadius = UDim.new(0, 8)
 local LoginStroke = Instance.new("UIStroke")
-LoginStroke.Color = Color3.fromRGB(0, 255, 179)
+LoginStroke.Color = Color3.fromRGB(50, 45, 65)
 LoginStroke.Thickness = 1
 LoginStroke.Parent = LoginFrame
 
+local LoginTopBar = Instance.new("Frame")
+LoginTopBar.Size = UDim2.new(1, 0, 0, 24)
+LoginTopBar.BackgroundColor3 = Color3.fromRGB(28, 25, 36)
+LoginTopBar.BorderSizePixel = 0
+LoginTopBar.Parent = LoginFrame
+
 local LoginTitle = Instance.new("TextLabel")
-LoginTitle.Size = UDim2.new(1, 0, 0, 55)
+LoginTitle.Size = UDim2.new(1, -10, 1, 0)
+LoginTitle.Position = UDim2.new(0, 8, 0, 0)
 LoginTitle.BackgroundTransparency = 1
-LoginTitle.Text = "DEATH NOTE // AUTENTICACIÓN"
-LoginTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-LoginTitle.Font = Enum.Font.GothamBold
-LoginTitle.TextSize = 14
-LoginTitle.Parent = LoginFrame
+LoginTitle.Text = "Misty - Autenticación"
+LoginTitle.TextColor3 = Color3.fromRGB(200, 200, 210)
+LoginTitle.Font = Enum.Font.Code
+LoginTitle.TextSize = 11
+LoginTitle.TextXAlignment = Enum.TextXAlignment.Left
+LoginTitle.Parent = LoginTopBar
 
 local PassBox = Instance.new("TextBox")
-PassBox.Size = UDim2.new(0, 310, 0, 40)
-PassBox.Position = UDim2.new(0.5, -155, 0, 65)
-PassBox.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
+PassBox.Size = UDim2.new(0, 280, 0, 30)
+PassBox.Position = UDim2.new(0.5, -140, 0, 45)
+PassBox.BackgroundColor3 = Color3.fromRGB(15, 13, 20)
+PassBox.BorderSizePixel = 0
 PassBox.Text = ""
-PassBox.PlaceholderText = "Ingrese la contraseña"
-PassBox.PlaceholderColor3 = Color3.fromRGB(110, 110, 130)
-PassBox.TextColor3 = Color3.fromRGB(0, 255, 179)
-PassBox.Font = Enum.Font.GothamBold
-PassBox.TextSize = 14
+PassBox.PlaceholderText = "Contraseña (24)"
+PassBox.PlaceholderColor3 = Color3.fromRGB(90, 85, 110)
+PassBox.TextColor3 = Color3.fromRGB(220, 220, 230)
+PassBox.Font = Enum.Font.Code
+PassBox.TextSize = 11
 PassBox.ClearTextOnFocus = false
 PassBox.Parent = LoginFrame
 
-Instance.new("UICorner", PassBox).CornerRadius = UDim.new(0, 6)
+local PassStroke = Instance.new("UIStroke")
+PassStroke.Color = Color3.fromRGB(45, 40, 60)
+PassStroke.Thickness = 1
+PassStroke.Parent = PassBox
 
 local LoginBtn = Instance.new("TextButton")
-LoginBtn.Size = UDim2.new(0, 310, 0, 40)
-LoginBtn.Position = UDim2.new(0.5, -155, 0, 125)
-LoginBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 179)
+LoginBtn.Size = UDim2.new(0, 280, 0, 30)
+LoginBtn.Position = UDim2.new(0.5, -140, 0, 95)
+LoginBtn.BackgroundColor3 = Color3.fromRGB(115, 80, 160)
+LoginBtn.BorderSizePixel = 0
 LoginBtn.Text = "INGRESAR"
-LoginBtn.TextColor3 = Color3.fromRGB(18, 18, 22)
-LoginBtn.Font = Enum.Font.GothamBold
-LoginBtn.TextSize = 13
+LoginBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoginBtn.Font = Enum.Font.Code
+LoginBtn.TextSize = 11
 LoginBtn.Parent = LoginFrame
-
-Instance.new("UICorner", LoginBtn).CornerRadius = UDim.new(0, 6)
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 720, 0, 480)
 MainFrame.Position = UDim2.new(0.5, -360, 0.5, -240)
-MainFrame.BackgroundColor3 = Color3.fromRGB(16, 16, 20)
+MainFrame.BackgroundColor3 = Color3.fromRGB(22, 20, 28)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Visible = false
 MainFrame.Parent = ScreenGui
 
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
 local MainStroke = Instance.new("UIStroke")
-MainStroke.Color = Color3.fromRGB(0, 255, 179)
+MainStroke.Color = Color3.fromRGB(50, 45, 65)
 MainStroke.Thickness = 1
 MainStroke.Parent = MainFrame
 
 LoginBtn.MouseButton1Click:Connect(function()
     if PassBox.Text == "24" then
-        TweenService:Create(LoginFrame, TweenInfo.new(0.3), {Position = UDim2.new(0.5, -190, 1.5, 0)}):Play()
+        TweenService:Create(LoginFrame, TweenInfo.new(0.3), {Position = UDim2.new(0.5, -160, 1.5, 0)}):Play()
         task.wait(0.3)
         LoginFrame:Destroy()
         MainFrame.Visible = true
-        MainFrame.Position = UDim2.new(0.5, -360, 0.5, -210)
-        MainFrame.Size = UDim2.new(0, 0, 0, 0)
-        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0, 720, 0, 480), Position = UDim2.new(0.5, -360, 0.5, -240)}):Play()
     else
         PassBox.Text = ""
         PassBox.PlaceholderText = "Contraseña Incorrecta"
@@ -224,66 +237,65 @@ LoginBtn.MouseButton1Click:Connect(function()
 end)
 
 -- =================================================================
--- INTERFAZ PRINCIPAL LIGERA
+-- INTERFAZ PRINCIPAL CON PESTAÑAS SUPERIORES HORIZONTALES
 -- =================================================================
 local Header = Instance.new("Frame")
-Header.Size = UDim2.new(1, 0, 0, 50)
-Header.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
+Header.Size = UDim2.new(1, 0, 0, 30)
+Header.BackgroundColor3 = Color3.fromRGB(28, 25, 36)
 Header.BorderSizePixel = 0
 Header.Parent = MainFrame
 
-Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 8)
-
 local BrandLabel = Instance.new("TextLabel")
-BrandLabel.Size = UDim2.new(0, 180, 1, 0)
-BrandLabel.Position = UDim2.new(0, 20, 0, 0)
+BrandLabel.Size = UDim2.new(0, 200, 1, 0)
+BrandLabel.Position = UDim2.new(0, 12, 0, 0)
 BrandLabel.BackgroundTransparency = 1
-BrandLabel.Text = "DEATH NOTE"
-BrandLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-BrandLabel.Font = Enum.Font.GothamBold
-BrandLabel.TextSize = 16
+BrandLabel.Text = "Misty // DEATH NOTE HUB"
+BrandLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+BrandLabel.Font = Enum.Font.Code
+BrandLabel.TextSize = 11
 BrandLabel.TextXAlignment = Enum.TextXAlignment.Left
 BrandLabel.Parent = Header
 
 local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 28, 0, 28)
-CloseBtn.Position = UDim2.new(1, -38, 0, 11)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -30, 0, 0)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(28, 25, 36)
+CloseBtn.BorderSizePixel = 0
 CloseBtn.Text = "✕"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 12
+CloseBtn.Font = Enum.Font.Code
+CloseBtn.TextSize = 11
 CloseBtn.Parent = Header
-
-Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
 
 CloseBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
 end)
 
-local Sidebar = Instance.new("ScrollingFrame")
-Sidebar.Size = UDim2.new(0, 180, 1, -50)
-Sidebar.Position = UDim2.new(0, 0, 0, 50)
-Sidebar.BackgroundTransparency = 1
-Sidebar.ScrollBarThickness = 2
-Sidebar.CanvasSize = UDim2.new(0, 0, 0, 0)
-Sidebar.Parent = MainFrame
+local MainTabsBar = Instance.new("ScrollingFrame")
+MainTabsBar.Size = UDim2.new(1, -16, 0, 30)
+MainTabsBar.Position = UDim2.new(0, 8, 0, 36)
+MainTabsBar.BackgroundColor3 = Color3.fromRGB(15, 13, 20)
+MainTabsBar.BorderSizePixel = 0
+MainTabsBar.ScrollBarThickness = 1
+MainTabsBar.CanvasSize = UDim2.new(0, 700, 0, 0)
+MainTabsBar.Parent = MainFrame
 
-local SidebarLayout = Instance.new("UIListLayout")
-SidebarLayout.Padding = UDim.new(0, 4)
-SidebarLayout.Parent = Sidebar
-
-local SidebarPadding = Instance.new("UIPadding")
-SidebarPadding.PaddingTop = UDim.new(0, 15)
-SidebarPadding.PaddingLeft = UDim.new(0, 12)
-SidebarPadding.PaddingRight = UDim.new(0, 12)
-SidebarPadding.Parent = Sidebar
+local MainTabsLayout = Instance.new("UIListLayout")
+MainTabsLayout.FillDirection = Enum.FillDirection.Horizontal
+MainTabsLayout.Padding = UDim.new(0, 3)
+MainTabsLayout.Parent = MainTabsBar
 
 local Container = Instance.new("Frame")
-Container.Size = UDim2.new(1, -195, 1, -65)
-Container.Position = UDim2.new(0, 190, 0, 58)
-Container.BackgroundTransparency = 1
+Container.Size = UDim2.new(1, -16, 1, -78)
+Container.Position = UDim2.new(0, 8, 0, 70)
+Container.BackgroundColor3 = Color3.fromRGB(15, 13, 20)
+Container.BorderSizePixel = 0
 Container.Parent = MainFrame
+
+local ContainerStroke = Instance.new("UIStroke")
+ContainerStroke.Color = Color3.fromRGB(35, 30, 48)
+ContainerStroke.Thickness = 1
+ContainerStroke.Parent = Container
 
 local Pages = {}
 
@@ -300,16 +312,14 @@ end
 
 local function CreateTab(name)
     local TabBtn = Instance.new("TextButton")
-    TabBtn.Size = UDim2.new(1, 0, 0, 38)
-    TabBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
-    TabBtn.Text = "   " .. name
+    TabBtn.Size = UDim2.new(0, 90, 1, 0)
+    TabBtn.BackgroundColor3 = Color3.fromRGB(22, 20, 28)
+    TabBtn.BorderSizePixel = 0
+    TabBtn.Text = name
     TabBtn.TextColor3 = Color3.fromRGB(150, 150, 175)
-    TabBtn.Font = Enum.Font.GothamMedium
-    TabBtn.TextSize = 13
-    TabBtn.TextXAlignment = Enum.TextXAlignment.Left
-    TabBtn.Parent = Sidebar
-
-    Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0, 6)
+    TabBtn.Font = Enum.Font.Code
+    TabBtn.TextSize = 10
+    TabBtn.Parent = MainTabsBar
 
     local Page = Instance.new("ScrollingFrame")
     Page.Size = UDim2.new(1, 0, 1, 0)
@@ -324,9 +334,14 @@ local function CreateTab(name)
     PageLayout.Padding = UDim.new(0, 8)
     PageLayout.Parent = Page
 
+    local PagePadding = Instance.new("UIPadding")
+    PagePadding.PaddingTop = UDim.new(0, 10)
+    PagePadding.PaddingLeft = UDim.new(0, 10)
+    PagePadding.PaddingRight = UDim.new(0, 10)
+    PagePadding.Parent = Page
+
     PageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         Page.CanvasSize = UDim2.new(0, 0, 0, PageLayout.AbsoluteContentSize.Y + 15)
-        Sidebar.CanvasSize = UDim2.new(0, 0, 0, SidebarLayout.AbsoluteContentSize.Y + 25)
     end)
 
     Pages[name] = {Button = TabBtn, View = Page}
@@ -334,70 +349,64 @@ local function CreateTab(name)
     TabBtn.MouseButton1Click:Connect(function()
         for _, tab in pairs(Pages) do
             tab.View.Visible = false
-            tab.Button.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+            tab.Button.BackgroundColor3 = Color3.fromRGB(22, 20, 28)
             tab.Button.TextColor3 = Color3.fromRGB(150, 150, 175)
         end
         Page.Visible = true
         TabBtn.BackgroundColor3 = Config.AccentColor
-        TabBtn.TextColor3 = Color3.fromRGB(16, 16, 20)
+        TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     end)
 
     return Page
 end
 
 local CombatTab   = CreateTab("Aimbot")
-local VisualsTab  = CreateTab("ESP / Visuales")
-local MiscTab     = CreateTab("Movimiento")
-local HitboxTab   = CreateTab("Hitboxes")
-local PlayersTab  = CreateTab("Jugadores / Listas")
-local ConfigTab   = CreateTab("Configuración")
+local VisualsTab  = CreateTab("Visuals")
+local RageTab     = CreateTab("Rage")
+local PlayerTab   = CreateTab("Player")
+local PlayersTab  = CreateTab("Players")
+local ConfigTab   = CreateTab("Config")
+local ColorsTab   = CreateTab("Colors")
 
 Pages["Aimbot"].View.Visible = true
 Pages["Aimbot"].Button.BackgroundColor3 = Config.AccentColor
-Pages["Aimbot"].Button.TextColor3 = Color3.fromRGB(16, 16, 20)
+Pages["Aimbot"].Button.TextColor3 = Color3.fromRGB(255, 255, 255)
 
 local function AddToggle(parent, text, defaultState, callback)
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(1, -10, 0, 40)
-    Frame.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+    Frame.Size = UDim2.new(1, -10, 0, 36)
+    Frame.BackgroundColor3 = Color3.fromRGB(22, 20, 28)
+    Frame.BorderSizePixel = 0
     Frame.Parent = parent
 
-    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Color = Color3.fromRGB(35, 30, 48)
+    Stroke.Thickness = 1
+    Stroke.Parent = Frame
 
     local Label = Instance.new("TextLabel")
     Label.Size = UDim2.new(0.7, 0, 1, 0)
-    Label.Position = UDim2.new(0, 14, 0, 0)
+    Label.Position = UDim2.new(0, 12, 0, 0)
     Label.BackgroundTransparency = 1
     Label.Text = text
     Label.TextColor3 = Color3.fromRGB(220, 220, 235)
-    Label.Font = Enum.Font.Gotham
-    Label.TextSize = 13
+    Label.Font = Enum.Font.Code
+    Label.TextSize = 11
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = Frame
 
     local Btn = Instance.new("TextButton")
-    Btn.Size = UDim2.new(0, 44, 0, 20)
-    Btn.Position = UDim2.new(1, -54, 0.5, -10)
-    Btn.BackgroundColor3 = defaultState and Config.AccentColor or Color3.fromRGB(38, 38, 48)
+    Btn.Size = UDim2.new(0, 40, 0, 18)
+    Btn.Position = UDim2.new(1, -50, 0.5, -9)
+    Btn.BackgroundColor3 = defaultState and Config.AccentColor or Color3.fromRGB(35, 30, 48)
+    Btn.BorderSizePixel = 0
     Btn.Text = ""
     Btn.Parent = Frame
-
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(1, 0)
-
-    local Circle = Instance.new("Frame")
-    Circle.Size = UDim2.new(0, 14, 0, 14)
-    Circle.Position = defaultState and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
-    Circle.BackgroundColor3 = defaultState and Color3.fromRGB(16, 16, 20) or Color3.fromRGB(160, 160, 180)
-    Circle.Parent = Btn
-
-    Instance.new("UICorner", Circle).CornerRadius = UDim.new(1, 0)
 
     local state = defaultState
     local function SetState(newState)
         state = newState
-        Btn.BackgroundColor3 = state and Config.AccentColor or Color3.fromRGB(38, 38, 48)
-        Circle.Position = state and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
-        Circle.BackgroundColor3 = state and Color3.fromRGB(16, 16, 20) or Color3.fromRGB(160, 160, 180)
+        Btn.BackgroundColor3 = state and Config.AccentColor or Color3.fromRGB(35, 30, 48)
         callback(state)
     end
 
@@ -410,48 +419,50 @@ end
 
 local function AddSlider(parent, text, min, max, default, decimals, callback)
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(1, -10, 0, 52)
-    Frame.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+    Frame.Size = UDim2.new(1, -10, 0, 50)
+    Frame.BackgroundColor3 = Color3.fromRGB(22, 20, 28)
+    Frame.BorderSizePixel = 0
     Frame.Parent = parent
 
-    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Color = Color3.fromRGB(35, 30, 48)
+    Stroke.Thickness = 1
+    Stroke.Parent = Frame
 
     local Label = Instance.new("TextLabel")
     Label.Size = UDim2.new(0.6, 0, 0, 20)
-    Label.Position = UDim2.new(0, 14, 0, 6)
+    Label.Position = UDim2.new(0, 12, 0, 6)
     Label.BackgroundTransparency = 1
     Label.Text = text
     Label.TextColor3 = Color3.fromRGB(220, 220, 235)
-    Label.Font = Enum.Font.Gotham
-    Label.TextSize = 13
+    Label.Font = Enum.Font.Code
+    Label.TextSize = 11
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = Frame
 
     local ValLabel = Instance.new("TextLabel")
     ValLabel.Size = UDim2.new(0.3, 0, 0, 20)
-    ValLabel.Position = UDim2.new(0.7, -14, 0, 6)
+    ValLabel.Position = UDim2.new(0.7, -12, 0, 6)
     ValLabel.BackgroundTransparency = 1
     ValLabel.Text = tostring(default)
     ValLabel.TextColor3 = Config.AccentColor
-    ValLabel.Font = Enum.Font.GothamBold
-    ValLabel.TextSize = 13
+    ValLabel.Font = Enum.Font.Code
+    ValLabel.TextSize = 11
     ValLabel.TextXAlignment = Enum.TextXAlignment.Right
     ValLabel.Parent = Frame
 
     local SliderBar = Instance.new("Frame")
-    SliderBar.Size = UDim2.new(1, -28, 0, 5)
-    SliderBar.Position = UDim2.new(0, 14, 0, 36)
-    SliderBar.BackgroundColor3 = Color3.fromRGB(38, 38, 48)
+    SliderBar.Size = UDim2.new(1, -24, 0, 5)
+    SliderBar.Position = UDim2.new(0, 12, 0, 34)
+    SliderBar.BackgroundColor3 = Color3.fromRGB(35, 30, 48)
+    SliderBar.BorderSizePixel = 0
     SliderBar.Parent = Frame
-
-    Instance.new("UICorner", SliderBar).CornerRadius = UDim.new(1, 0)
 
     local Fill = Instance.new("Frame")
     Fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
     Fill.BackgroundColor3 = Config.AccentColor
+    Fill.BorderSizePixel = 0
     Fill.Parent = SliderBar
-
-    Instance.new("UICorner", Fill).CornerRadius = UDim.new(1, 0)
 
     local dragging = false
     local function UpdateInput(input)
@@ -487,49 +498,57 @@ end
 
 local function AddButton(parent, text, callback)
     local Btn = Instance.new("TextButton")
-    Btn.Size = UDim2.new(1, -10, 0, 38)
-    Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    Btn.Size = UDim2.new(1, -10, 0, 36)
+    Btn.BackgroundColor3 = Color3.fromRGB(26, 23, 34)
+    Btn.BorderSizePixel = 0
     Btn.Text = text
     Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Btn.Font = Enum.Font.GothamMedium
-    Btn.TextSize = 13
+    Btn.Font = Enum.Font.Code
+    Btn.TextSize = 11
     Btn.Parent = parent
 
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Color = Color3.fromRGB(35, 30, 48)
+    Stroke.Thickness = 1
+    Stroke.Parent = Btn
+
     Btn.MouseButton1Click:Connect(callback)
     return Btn
 end
 
 local function AddKeybind(parent, text, defaultKey, callback)
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(1, -10, 0, 40)
-    Frame.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+    Frame.Size = UDim2.new(1, -10, 0, 36)
+    Frame.BackgroundColor3 = Color3.fromRGB(22, 20, 28)
+    Frame.BorderSizePixel = 0
     Frame.Parent = parent
 
-    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Color = Color3.fromRGB(35, 30, 48)
+    Stroke.Thickness = 1
+    Stroke.Parent = Frame
 
     local Label = Instance.new("TextLabel")
     Label.Size = UDim2.new(0.6, 0, 1, 0)
-    Label.Position = UDim2.new(0, 14, 0, 0)
+    Label.Position = UDim2.new(0, 12, 0, 0)
     Label.BackgroundTransparency = 1
     Label.Text = text
     Label.TextColor3 = Color3.fromRGB(220, 220, 235)
-    Label.Font = Enum.Font.Gotham
-    Label.TextSize = 13
+    Label.Font = Enum.Font.Code
+    Label.TextSize = 11
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = Frame
 
     local BindBtn = Instance.new("TextButton")
-    BindBtn.Size = UDim2.new(0, 90, 0, 24)
-    BindBtn.Position = UDim2.new(1, -100, 0.5, -12)
-    BindBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    BindBtn.Size = UDim2.new(0, 85, 0, 22)
+    BindBtn.Position = UDim2.new(1, -95, 0.5, -11)
+    BindBtn.BackgroundColor3 = Color3.fromRGB(30, 26, 40)
+    BindBtn.BorderSizePixel = 0
     BindBtn.Text = typeof(defaultKey) == "EnumItem" and defaultKey.Name or tostring(defaultKey)
     BindBtn.TextColor3 = Config.AccentColor
-    BindBtn.Font = Enum.Font.GothamBold
-    BindBtn.TextSize = 12
+    BindBtn.Font = Enum.Font.Code
+    BindBtn.TextSize = 11
     BindBtn.Parent = Frame
-
-    Instance.new("UICorner", BindBtn).CornerRadius = UDim.new(0, 4)
 
     local listening = false
     BindBtn.MouseButton1Click:Connect(function()
@@ -561,29 +580,33 @@ end
 
 local function AddColorPalette(parent, text, defaultColor, callback)
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(1, -10, 0, 64)
-    Frame.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+    Frame.Size = UDim2.new(1, -10, 0, 56)
+    Frame.BackgroundColor3 = Color3.fromRGB(22, 20, 28)
+    Frame.BorderSizePixel = 0
     Frame.Parent = parent
 
-    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Color = Color3.fromRGB(35, 30, 48)
+    Stroke.Thickness = 1
+    Stroke.Parent = Frame
 
     local Label = Instance.new("TextLabel")
     Label.Size = UDim2.new(0.4, 0, 1, 0)
-    Label.Position = UDim2.new(0, 14, 0, 0)
+    Label.Position = UDim2.new(0, 12, 0, 0)
     Label.BackgroundTransparency = 1
     Label.Text = text
     Label.TextColor3 = Color3.fromRGB(220, 220, 235)
-    Label.Font = Enum.Font.Gotham
-    Label.TextSize = 13
+    Label.Font = Enum.Font.Code
+    Label.TextSize = 11
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = Frame
 
     local ScrollPal = Instance.new("ScrollingFrame")
-    ScrollPal.Size = UDim2.new(0, 220, 0, 36)
-    ScrollPal.Position = UDim2.new(1, -230, 0.5, -18)
+    ScrollPal.Size = UDim2.new(0, 220, 0, 32)
+    ScrollPal.Position = UDim2.new(1, -230, 0.5, -16)
     ScrollPal.BackgroundTransparency = 1
     ScrollPal.CanvasSize = UDim2.new(0, 340, 0, 0)
-    ScrollPal.ScrollBarThickness = 2
+    ScrollPal.ScrollBarThickness = 1
     ScrollPal.Parent = Frame
 
     local UIList = Instance.new("UIListLayout")
@@ -593,45 +616,47 @@ local function AddColorPalette(parent, text, defaultColor, callback)
 
     local colors = {
         Color3.fromRGB(255, 255, 255),
-        Color3.fromRGB(0, 255, 179),
+        Color3.fromRGB(115, 80, 160),
         Color3.fromRGB(60, 150, 255),
         Color3.fromRGB(170, 60, 255),
         Color3.fromRGB(255, 60, 180),
-        Color3.fromRGB(255, 60, 60),
         Color3.fromRGB(255, 140, 40),
         Color3.fromRGB(255, 230, 60),
-        Color3.fromRGB(60, 255, 60),
         Color3.fromRGB(100, 100, 100)
     }
 
     for _, col in ipairs(colors) do
         local ColorBtn = Instance.new("TextButton")
-        ColorBtn.Size = UDim2.new(0, 28, 0, 28)
+        ColorBtn.Size = UDim2.new(0, 26, 0, 26)
         ColorBtn.BackgroundColor3 = col
+        ColorBtn.BorderSizePixel = 0
         ColorBtn.Text = ""
         ColorBtn.Parent = ScrollPal
 
-        Instance.new("UICorner", ColorBtn).CornerRadius = UDim.new(1, 0)
         ColorBtn.MouseButton1Click:Connect(function() callback(col) end)
     end
 end
 
 local function AddDropdown(parent, text, options, defaultOption, callback)
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(1, -10, 0, 40)
-    Frame.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+    Frame.Size = UDim2.new(1, -10, 0, 36)
+    Frame.BackgroundColor3 = Color3.fromRGB(22, 20, 28)
+    Frame.BorderSizePixel = 0
     Frame.Parent = parent
 
-    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Color = Color3.fromRGB(35, 30, 48)
+    Stroke.Thickness = 1
+    Stroke.Parent = Frame
 
     local Label = Instance.new("TextLabel")
     Label.Size = UDim2.new(0.5, 0, 1, 0)
-    Label.Position = UDim2.new(0, 14, 0, 0)
+    Label.Position = UDim2.new(0, 12, 0, 0)
     Label.BackgroundTransparency = 1
     Label.Text = text
     Label.TextColor3 = Color3.fromRGB(220, 220, 235)
-    Label.Font = Enum.Font.Gotham
-    Label.TextSize = 13
+    Label.Font = Enum.Font.Code
+    Label.TextSize = 11
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = Frame
 
@@ -641,16 +666,15 @@ local function AddDropdown(parent, text, options, defaultOption, callback)
     end
 
     local DropBtn = Instance.new("TextButton")
-    DropBtn.Size = UDim2.new(0, 115, 0, 24)
-    DropBtn.Position = UDim2.new(1, -125, 0.5, -12)
-    DropBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    DropBtn.Size = UDim2.new(0, 110, 0, 22)
+    DropBtn.Position = UDim2.new(1, -120, 0.5, -11)
+    DropBtn.BackgroundColor3 = Color3.fromRGB(30, 26, 40)
+    DropBtn.BorderSizePixel = 0
     DropBtn.Text = options[currentIndex]
     DropBtn.TextColor3 = Config.AccentColor
-    DropBtn.Font = Enum.Font.GothamBold
-    DropBtn.TextSize = 12
+    DropBtn.Font = Enum.Font.Code
+    DropBtn.TextSize = 11
     DropBtn.Parent = Frame
-
-    Instance.new("UICorner", DropBtn).CornerRadius = UDim.new(0, 4)
 
     DropBtn.MouseButton1Click:Connect(function()
         currentIndex = (currentIndex % #options) + 1
@@ -684,36 +708,42 @@ AddColorPalette(VisualsTab, "Color de Cajas", Config.ESP_BoxColor, function(c) C
 AddColorPalette(VisualsTab, "Color de Nombres", Config.ESP_NameColor, function(c) Config.ESP_NameColor = c end)
 AddColorPalette(VisualsTab, "Color de Líneas", Config.ESP_TracerColor, function(c) Config.ESP_TracerColor = c end)
 
-AddToggle(HitboxTab, "Ampliar hitboxes (Rage)", Config.Hitbox_Enabled, function(s) Config.Hitbox_Enabled = s end)
-AddToggle(HitboxTab, "Previsualizar hitboxes", Config.Hitbox_Preview, function(s) Config.Hitbox_Preview = s end)
-AddSlider(HitboxTab, "Tamaño de hitbox", 1, 50, Config.Hitbox_Size, false, function(v) Config.Hitbox_Size = v end)
+AddToggle(RageTab, "Ampliar hitboxes (Rage)", Config.Hitbox_Enabled, function(s) Config.Hitbox_Enabled = s end)
+AddToggle(RageTab, "Previsualizar hitboxes", Config.Hitbox_Preview, function(s) Config.Hitbox_Preview = s end)
+AddSlider(RageTab, "Tamaño de hitbox", 1, 50, Config.Hitbox_Size, false, function(v) Config.Hitbox_Size = v end)
+AddToggle(RageTab, "Disparo automático rápido", Config.RapidFire, function(s) Config.RapidFire = s end)
+AddToggle(RageTab, "Redirección de balas", Config.RageBullets, function(s) Config.RageBullets = s end)
 
-ToggleCallbacks.Speed = AddToggle(MiscTab, "Velocidad de movimiento", Config.SpeedEnabled, function(s) Config.SpeedEnabled = s end)
-AddKeybind(MiscTab, "Tecla de velocidad", Config.Keys.Speed, function(k) Config.Keys.Speed = k end)
-AddSlider(MiscTab, "Valor de velocidad", 16, 800, Config.WalkSpeed, false, function(v) Config.WalkSpeed = v end)
+-- Opciones de Player
+ToggleCallbacks.Speed = AddToggle(PlayerTab, "Velocidad de movimiento", Config.SpeedEnabled, function(s) Config.SpeedEnabled = s end)
+AddKeybind(PlayerTab, "Tecla de velocidad", Config.Keys.Speed, function(k) Config.Keys.Speed = k end)
+AddSlider(PlayerTab, "Valor de velocidad", 16, 800, Config.WalkSpeed, false, function(v) Config.WalkSpeed = v end)
 
-ToggleCallbacks.Jump = AddToggle(MiscTab, "Salto potenciado", Config.JumpEnabled, function(s) Config.JumpEnabled = s end)
-AddKeybind(MiscTab, "Tecla de salto", Config.Keys.Jump, function(k) Config.Keys.Jump = k end)
-AddSlider(MiscTab, "Valor de salto", 50, 300, Config.JumpPower, false, function(v) Config.JumpPower = v end)
+ToggleCallbacks.Jump = AddToggle(PlayerTab, "Salto potenciado", Config.JumpEnabled, function(s) Config.JumpEnabled = s end)
+AddKeybind(PlayerTab, "Tecla de salto", Config.Keys.Jump, function(k) Config.Keys.Jump = k end)
+AddSlider(PlayerTab, "Valor de salto", 50, 300, Config.JumpPower, false, function(v) Config.JumpPower = v end)
 
-AddToggle(MiscTab, "Atravesar paredes", Config.Noclip, function(s) Config.Noclip = s end)
+AddToggle(PlayerTab, "Atravesar paredes", Config.Noclip, function(s) Config.Noclip = s end)
 
-ToggleCallbacks.Gravity = AddToggle(MiscTab, "Modificar gravedad", Config.GravityEnabled, function(s) Config.GravityEnabled = s end)
-AddKeybind(MiscTab, "Tecla de gravedad", Config.Keys.Gravity, function(k) Config.Keys.Gravity = k end)
-AddSlider(MiscTab, "Valor de gravedad", 0, 196, Config.Gravity, false, function(v) Config.Gravity = v end)
+ToggleCallbacks.Gravity = AddToggle(PlayerTab, "Modificar gravedad", Config.GravityEnabled, function(s) Config.GravityEnabled = s end)
+AddKeybind(PlayerTab, "Tecla de gravedad", Config.Keys.Gravity, function(k) Config.Keys.Gravity = k end)
+AddSlider(PlayerTab, "Valor de gravedad", 0, 196, Config.Gravity, false, function(v) Config.Gravity = v end)
 
-ToggleCallbacks.SpinBot = AddToggle(MiscTab, "Giro automático", Config.SpinBot, function(s) Config.SpinBot = s end)
-AddKeybind(MiscTab, "Tecla de giro", Config.Keys.SpinBot, function(k) Config.Keys.SpinBot = k end)
-AddSlider(MiscTab, "Velocidad de giro", 1, 100, Config.SpinSpeed, false, function(v) Config.SpinSpeed = v end)
+ToggleCallbacks.SpinBot = AddToggle(PlayerTab, "Giro automático", Config.SpinBot, function(s) Config.SpinBot = s end)
+AddKeybind(PlayerTab, "Tecla de giro", Config.Keys.SpinBot, function(k) Config.Keys.SpinBot = k end)
+AddSlider(PlayerTab, "Velocidad de giro", 1, 100, Config.SpinSpeed, false, function(v) Config.SpinSpeed = v end)
 
-ToggleCallbacks.Fly = AddToggle(MiscTab, "Vuelo libre", Config.FlyEnabled, function(s) Config.FlyEnabled = s end)
-AddKeybind(MiscTab, "Tecla de vuelo", Config.Keys.Fly, function(k) Config.Keys.Fly = k end)
-AddSlider(MiscTab, "Velocidad de vuelo", 10, 500, Config.FlySpeed, false, function(v) Config.FlySpeed = v end)
+ToggleCallbacks.Fly = AddToggle(PlayerTab, "Vuelo libre", Config.FlyEnabled, function(s) Config.FlyEnabled = s end)
+AddKeybind(PlayerTab, "Tecla de vuelo", Config.Keys.Fly, function(k) Config.Keys.Fly = k end)
+AddSlider(PlayerTab, "Velocidad de vuelo", 10, 500, Config.FlySpeed, false, function(v) Config.FlySpeed = v end)
 
-AddToggle(MiscTab, "Disparo automático rápido", Config.RapidFire, function(s) Config.RapidFire = s end)
-AddToggle(MiscTab, "Redirección de balas (Rage Da Hood)", Config.RageBullets, function(s) Config.RageBullets = s end)
+-- Orbit Controls (Fijar objetivo al presionar la tecla)
+AddToggle(PlayerTab, "Orbit Target (Fijar con tecla)", Config.OrbitEnabled, function(s) Config.OrbitEnabled = s end)
+AddKeybind(PlayerTab, "Tecla de Orbit", Config.Keys.Orbit, function(k) Config.Keys.Orbit = k end)
+AddSlider(PlayerTab, "Velocidad de Orbit", 1, 50, Config.OrbitSpeed, false, function(v) Config.OrbitSpeed = v end)
+AddSlider(PlayerTab, "Radio de Orbit (Cerca/Lejos)", 0.1, 15, Config.OrbitRadius, true, function(v) Config.OrbitRadius = v end)
 
--- Players Tab
+-- Players Tab Logic
 local PlayersScroll = Instance.new("ScrollingFrame")
 PlayersScroll.Size = UDim2.new(1, 0, 1, 0)
 PlayersScroll.BackgroundTransparency = 1
@@ -738,10 +768,14 @@ local function RefreshPlayerList()
         if p ~= LocalPlayer then
             local PFrame = Instance.new("Frame")
             PFrame.Size = UDim2.new(1, -10, 0, 40)
-            PFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+            PFrame.BackgroundColor3 = Color3.fromRGB(22, 20, 28)
+            PFrame.BorderSizePixel = 0
             PFrame.Parent = PlayersScroll
 
-            Instance.new("UICorner", PFrame).CornerRadius = UDim.new(0, 6)
+            local Stroke = Instance.new("UIStroke")
+            Stroke.Color = Color3.fromRGB(35, 30, 48)
+            Stroke.Thickness = 1
+            Stroke.Parent = PFrame
 
             local PName = Instance.new("TextLabel")
             PName.Size = UDim2.new(0, 110, 1, 0)
@@ -749,21 +783,21 @@ local function RefreshPlayerList()
             PName.BackgroundTransparency = 1
             PName.Text = p.Name
             PName.TextColor3 = Color3.fromRGB(220, 220, 235)
-            PName.Font = Enum.Font.GothamBold
-            PName.TextSize = 12
+            PName.Font = Enum.Font.Code
+            PName.TextSize = 11
             PName.TextXAlignment = Enum.TextXAlignment.Left
             PName.Parent = PFrame
 
             local TpBtn = Instance.new("TextButton")
             TpBtn.Size = UDim2.new(0, 36, 0, 24)
             TpBtn.Position = UDim2.new(1, -170, 0.5, -12)
-            TpBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            TpBtn.BackgroundColor3 = Color3.fromRGB(30, 26, 40)
+            TpBtn.BorderSizePixel = 0
             TpBtn.Text = "TP"
             TpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            TpBtn.Font = Enum.Font.GothamBold
+            TpBtn.Font = Enum.Font.Code
             TpBtn.TextSize = 11
             TpBtn.Parent = PFrame
-            Instance.new("UICorner", TpBtn).CornerRadius = UDim.new(0, 4)
 
             TpBtn.MouseButton1Click:Connect(function()
                 if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
@@ -774,24 +808,22 @@ local function RefreshPlayerList()
             local SpecBtn = Instance.new("TextButton")
             SpecBtn.Size = UDim2.new(0, 44, 0, 24)
             SpecBtn.Position = UDim2.new(1, -130, 0.5, -12)
-            SpecBtn.BackgroundColor3 = Config.SpectatingPlayer == p and Color3.fromRGB(255, 140, 40) or Color3.fromRGB(35, 35, 45)
+            SpecBtn.BackgroundColor3 = Config.SpectatingPlayer == p and Color3.fromRGB(255, 140, 40) or Color3.fromRGB(30, 26, 40)
+            SpecBtn.BorderSizePixel = 0
             SpecBtn.Text = "SPEC"
             SpecBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            SpecBtn.Font = Enum.Font.GothamBold
+            SpecBtn.Font = Enum.Font.Code
             SpecBtn.TextSize = 10
             SpecBtn.Parent = PFrame
-            Instance.new("UICorner", SpecBtn).CornerRadius = UDim.new(0, 4)
 
             SpecBtn.MouseButton1Click:Connect(function()
                 if Config.SpectatingPlayer == p then
                     Config.SpectatingPlayer = nil
                     Camera.CameraSubject = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                    SpecBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
                 else
                     Config.SpectatingPlayer = p
                     if p.Character and p.Character:FindFirstChildOfClass("Humanoid") then
                         Camera.CameraSubject = p.Character:FindFirstChildOfClass("Humanoid")
-                        SpecBtn.BackgroundColor3 = Color3.fromRGB(255, 140, 40)
                     end
                 end
             end)
@@ -799,44 +831,44 @@ local function RefreshPlayerList()
             local WlBtn = Instance.new("TextButton")
             WlBtn.Size = UDim2.new(0, 36, 0, 24)
             WlBtn.Position = UDim2.new(1, -82, 0.5, -12)
-            WlBtn.BackgroundColor3 = Config.Whitelist[p] and Color3.fromRGB(60, 150, 255) or Color3.fromRGB(35, 35, 45)
+            WlBtn.BackgroundColor3 = Config.Whitelist[p] and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(30, 26, 40)
+            WlBtn.BorderSizePixel = 0
             WlBtn.Text = "WL"
             WlBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            WlBtn.Font = Enum.Font.GothamBold
+            WlBtn.Font = Enum.Font.Code
             WlBtn.TextSize = 11
             WlBtn.Parent = PFrame
-            Instance.new("UICorner", WlBtn).CornerRadius = UDim.new(0, 4)
 
             WlBtn.MouseButton1Click:Connect(function()
                 if Config.Whitelist[p] then
                     Config.Whitelist[p] = nil
-                    WlBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+                    WlBtn.BackgroundColor3 = Color3.fromRGB(30, 26, 40)
                 else
                     Config.Whitelist[p] = true
                     Config.Blacklist[p] = nil
-                    WlBtn.BackgroundColor3 = Color3.fromRGB(60, 150, 255)
+                    WlBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
                 end
             end)
 
             local BlBtn = Instance.new("TextButton")
             BlBtn.Size = UDim2.new(0, 36, 0, 24)
             BlBtn.Position = UDim2.new(1, -42, 0.5, -12)
-            BlBtn.BackgroundColor3 = Config.Blacklist[p] and Color3.fromRGB(255, 60, 60) or Color3.fromRGB(35, 35, 45)
+            BlBtn.BackgroundColor3 = Config.Blacklist[p] and Color3.fromRGB(150, 150, 150) or Color3.fromRGB(30, 26, 40)
+            BlBtn.BorderSizePixel = 0
             BlBtn.Text = "BL"
             BlBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            BlBtn.Font = Enum.Font.GothamBold
+            BlBtn.Font = Enum.Font.Code
             BlBtn.TextSize = 11
             BlBtn.Parent = PFrame
-            Instance.new("UICorner", BlBtn).CornerRadius = UDim.new(0, 4)
 
             BlBtn.MouseButton1Click:Connect(function()
                 if Config.Blacklist[p] then
                     Config.Blacklist[p] = nil
-                    BlBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+                    BlBtn.BackgroundColor3 = Color3.fromRGB(30, 26, 40)
                 else
                     Config.Blacklist[p] = true
                     Config.Whitelist[p] = nil
-                    BlBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+                    BlBtn.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
                 end
             end)
         end
@@ -857,7 +889,7 @@ AddButton(ConfigTab, "Cerrar / Destruir script", function()
 end)
 
 -- =================================================================
--- LOOP PRINCIPAL OPTIMIZADO PARA MÁXIMO FPS
+-- BUCLE PRINCIPAL & ORBIT LOGIC (FIJADO AUTOMÁTICO POR TECLA)
 -- =================================================================
 local flyKeys = {W = false, S = false, A = false, D = false, Space = false, Shift = false}
 table.insert(Connections, UserInputService.InputBegan:Connect(function(input, gp)
@@ -880,8 +912,31 @@ table.insert(Connections, UserInputService.InputEnded:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.LeftShift then flyKeys.Shift = false end
 end))
 
+-- Función para encontrar al jugador más cercano al mouse en el momento de pulsar la tecla
+local function GetClosestPlayerToMouse()
+    local mousePos = UserInputService:GetMouseLocation()
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = player.Character.HumanoidRootPart
+            local screenPos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+            if onScreen then
+                local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                if dist < shortestDistance then
+                    shortestDistance = dist
+                    closestPlayer = player
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+
 local flyBodyVel, flyBodyGyro
-table.insert(Connections, RunService.RenderStepped:Connect(function()
+local orbitAngle = 0
+table.insert(Connections, RunService.RenderStepped:Connect(function(dt)
     pcall(function()
         local character = LocalPlayer.Character
         if character then
@@ -902,11 +957,22 @@ table.insert(Connections, RunService.RenderStepped:Connect(function()
                 end
             end
 
-            if Config.SpinBot and rootPart then
+            -- Lógica de Orbit Automática con el objetivo fijado
+            if Config.OrbitEnabled and Config.OrbitTarget and Config.OrbitTarget.Character and Config.OrbitTarget.Character:FindFirstChild("HumanoidRootPart") and rootPart then
+                local targetHrp = Config.OrbitTarget.Character.HumanoidRootPart
+                orbitAngle = orbitAngle + (Config.OrbitSpeed * dt)
+                local x = targetHrp.Position.X + math.cos(orbitAngle) * Config.OrbitRadius
+                local z = targetHrp.Position.Z + math.sin(orbitAngle) * Config.OrbitRadius
+                local y = targetHrp.Position.Y
+                rootPart.CFrame = CFrame.new(Vector3.new(x, y, z), targetHrp.Position)
+                rootPart.Velocity = Vector3.new(0, 0, 0)
+            end
+
+            if Config.SpinBot and rootPart and not Config.OrbitEnabled then
                 rootPart.CFrame = rootPart.CFrame * CFrame.Angles(0, math.rad(Config.SpinSpeed), 0)
             end
 
-            if Config.FlyEnabled and rootPart then
+            if Config.FlyEnabled and rootPart and not Config.OrbitEnabled then
                 if not flyBodyVel then
                     flyBodyVel = Instance.new("BodyVelocity", rootPart)
                     flyBodyVel.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
@@ -937,7 +1003,6 @@ table.insert(Connections, RunService.RenderStepped:Connect(function()
             end
         end
 
-        -- Hitbox expander optimizado (solo aplica cambios cuando está activo)
         if Config.Hitbox_Enabled then
             for _, player in ipairs(Players:GetPlayers()) do
                 if player ~= LocalPlayer and player.Character then
@@ -955,7 +1020,7 @@ table.insert(Connections, RunService.RenderStepped:Connect(function()
 end))
 
 -- =================================================================
--- AIMBOT OPTIMIZADO
+-- AIMBOT
 -- =================================================================
 local function GetTarget()
     local mousePos = UserInputService:GetMouseLocation()
@@ -1035,7 +1100,7 @@ table.insert(Connections, RunService.RenderStepped:Connect(function()
 end))
 
 -- =================================================================
--- ESP LIGERO Y FLUIDO
+-- ESP
 -- =================================================================
 local function CreateESP(player)
     local box = Drawing.new("Square")
@@ -1049,7 +1114,7 @@ local function CreateESP(player)
 
     local healthBar = Drawing.new("Square")
     healthBar.Filled = true
-    healthBar.Color = Color3.fromRGB(0, 255, 0)
+    healthBar.Color = Color3.fromRGB(255, 255, 255)
     healthBar.Visible = false
 
     local name = Drawing.new("Text")
@@ -1100,16 +1165,10 @@ table.insert(Connections, RunService.RenderStepped:Connect(function()
         pcall(function()
             local currentBoxColor = Config.ESP_BoxColor
             local currentTracerColor = Config.ESP_TracerColor
-
-            if player == Config.LockedTarget then
-                currentBoxColor = Config.ESP_TargetColor
-                currentTracerColor = Config.ESP_TargetColor
-            elseif Config.Whitelist[player] then
-                currentBoxColor = Color3.fromRGB(60, 150, 255)
-                currentTracerColor = Color3.fromRGB(60, 150, 255)
-            elseif Config.Blacklist[player] then
-                currentBoxColor = Color3.fromRGB(255, 60, 60)
-                currentTracerColor = Color3.fromRGB(255, 60, 60)
+            
+            local currentNameColor = Config.ESP_NameColor
+            if player == Config.LockedTarget or Config.Whitelist[player] or Config.Blacklist[player] or player == Config.OrbitTarget then
+                currentNameColor = Color3.fromRGB(0, 255, 0)
             end
 
             if Config.ESP_Enabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
@@ -1142,7 +1201,7 @@ table.insert(Connections, RunService.RenderStepped:Connect(function()
 
                         esp.HealthBar.Size = Vector2.new(2, height * healthPct)
                         esp.HealthBar.Position = Vector2.new(vector.X - width / 2 - 5, vector.Y + height / 2 - (height * healthPct))
-                        esp.HealthBar.Color = Color3.fromRGB(255 - (255 * healthPct), 255 * healthPct, 0)
+                        esp.HealthBar.Color = Color3.fromRGB(255, 255, 255)
                         esp.HealthBar.Visible = true
                     else
                         esp.HealthOutline.Visible = false
@@ -1151,7 +1210,7 @@ table.insert(Connections, RunService.RenderStepped:Connect(function()
 
                     if Config.ESP_Names then
                         esp.Name.Position = Vector2.new(vector.X, vector.Y - height / 2 - 16)
-                        esp.Name.Color = Config.ESP_NameColor
+                        esp.Name.Color = currentNameColor
                         esp.Name.Visible = true
                     else esp.Name.Visible = false end
 
@@ -1218,6 +1277,13 @@ table.insert(Connections, UserInputService.InputBegan:Connect(function(input, gp
     if not gp then
         if (typeof(Config.MenuKey) == "EnumItem" and input.KeyCode == Config.MenuKey) or (input.UserInputType == Config.MenuKey) then
             MainFrame.Visible = not MainFrame.Visible
+        elseif input.KeyCode == Config.Keys.Orbit then
+            Config.OrbitEnabled = not Config.OrbitEnabled
+            if Config.OrbitEnabled then
+                Config.OrbitTarget = GetClosestPlayerToMouse()
+            else
+                Config.OrbitTarget = nil
+            end
         elseif input.KeyCode == Config.Keys.ESP then
             Config.ESP_Enabled = not Config.ESP_Enabled
             if ToggleCallbacks.ESP then ToggleCallbacks.ESP(Config.ESP_Enabled) end
