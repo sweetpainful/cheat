@@ -1,5 +1,5 @@
 -- =================================================================
--- DEATH NOTE HUB | ELITE SUITE v15.0 (OPTIMIZED & LIGHTWEIGHT)
+-- DEATH NOTE HUB | ELITE SUITE v16.3 (PRESETS & AIMBOT STICKY FIX)
 -- =================================================================
 
 local CoreGui = game:GetService("CoreGui")
@@ -9,6 +9,7 @@ local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
 
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
@@ -38,7 +39,6 @@ local Config = {
     FlyEnabled = false,
     FlySpeed = 50,
     RapidFire = false,
-    RageBullets = false,
 
     -- Orbit Settings
     OrbitEnabled = false,
@@ -67,7 +67,6 @@ local Config = {
     ESP_BoxColor = Color3.fromRGB(255, 255, 255),
     ESP_NameColor = Color3.fromRGB(255, 255, 255),
     ESP_TracerColor = Color3.fromRGB(255, 255, 255),
-    ESP_TargetColor = Color3.fromRGB(255, 0, 255),
     Fullbright = false,
 
     -- Aimbot Options
@@ -87,7 +86,7 @@ local Config = {
     Whitelist = {},
     Blacklist = {},
     LockedTarget = nil,
-    OrbitTarget = nil, -- Objetivo fijado para el Orbit automático
+    OrbitTarget = nil, 
     SpectatingPlayer = nil
 }
 
@@ -99,6 +98,14 @@ local FOVCircle = Drawing.new("Circle")
 FOVCircle.Thickness = 1.5
 FOVCircle.Filled = false
 FOVCircle.Visible = false
+
+-- Sistema de Archivos para Presets
+local FolderName = "DeathNoteHub_Presets"
+pcall(function()
+    if not isfolder(FolderName) then
+        makefolder(FolderName)
+    end
+end)
 
 local function UnloadScript()
     for _, conn in ipairs(Connections) do
@@ -237,7 +244,7 @@ LoginBtn.MouseButton1Click:Connect(function()
 end)
 
 -- =================================================================
--- INTERFAZ PRINCIPAL CON PESTAÑAS SUPERIORES HORIZONTALES
+-- INTERFAZ PRINCIPAL
 -- =================================================================
 local Header = Instance.new("Frame")
 Header.Size = UDim2.new(1, 0, 0, 30)
@@ -366,7 +373,7 @@ local RageTab     = CreateTab("Rage")
 local PlayerTab   = CreateTab("Player")
 local PlayersTab  = CreateTab("Players")
 local ConfigTab   = CreateTab("Config")
-local ColorsTab   = CreateTab("Colors")
+local ColorsTab   = CreateTab("Presets")
 
 Pages["Aimbot"].View.Visible = true
 Pages["Aimbot"].Button.BackgroundColor3 = Config.AccentColor
@@ -578,65 +585,6 @@ local function AddKeybind(parent, text, defaultKey, callback)
     end)
 end
 
-local function AddColorPalette(parent, text, defaultColor, callback)
-    local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(1, -10, 0, 56)
-    Frame.BackgroundColor3 = Color3.fromRGB(22, 20, 28)
-    Frame.BorderSizePixel = 0
-    Frame.Parent = parent
-
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Color3.fromRGB(35, 30, 48)
-    Stroke.Thickness = 1
-    Stroke.Parent = Frame
-
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(0.4, 0, 1, 0)
-    Label.Position = UDim2.new(0, 12, 0, 0)
-    Label.BackgroundTransparency = 1
-    Label.Text = text
-    Label.TextColor3 = Color3.fromRGB(220, 220, 235)
-    Label.Font = Enum.Font.Code
-    Label.TextSize = 11
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = Frame
-
-    local ScrollPal = Instance.new("ScrollingFrame")
-    ScrollPal.Size = UDim2.new(0, 220, 0, 32)
-    ScrollPal.Position = UDim2.new(1, -230, 0.5, -16)
-    ScrollPal.BackgroundTransparency = 1
-    ScrollPal.CanvasSize = UDim2.new(0, 340, 0, 0)
-    ScrollPal.ScrollBarThickness = 1
-    ScrollPal.Parent = Frame
-
-    local UIList = Instance.new("UIListLayout")
-    UIList.FillDirection = Enum.FillDirection.Horizontal
-    UIList.Padding = UDim.new(0, 6)
-    UIList.Parent = ScrollPal
-
-    local colors = {
-        Color3.fromRGB(255, 255, 255),
-        Color3.fromRGB(115, 80, 160),
-        Color3.fromRGB(60, 150, 255),
-        Color3.fromRGB(170, 60, 255),
-        Color3.fromRGB(255, 60, 180),
-        Color3.fromRGB(255, 140, 40),
-        Color3.fromRGB(255, 230, 60),
-        Color3.fromRGB(100, 100, 100)
-    }
-
-    for _, col in ipairs(colors) do
-        local ColorBtn = Instance.new("TextButton")
-        ColorBtn.Size = UDim2.new(0, 26, 0, 26)
-        ColorBtn.BackgroundColor3 = col
-        ColorBtn.BorderSizePixel = 0
-        ColorBtn.Text = ""
-        ColorBtn.Parent = ScrollPal
-
-        ColorBtn.MouseButton1Click:Connect(function() callback(col) end)
-    end
-end
-
 local function AddDropdown(parent, text, options, defaultOption, callback)
     local Frame = Instance.new("Frame")
     Frame.Size = UDim2.new(1, -10, 0, 36)
@@ -689,10 +637,10 @@ end
 -- =================================================================
 AddToggle(CombatTab, "Aimbot", Config.Aimbot_Enabled, function(s) Config.Aimbot_Enabled = s end)
 AddKeybind(CombatTab, "Tecla de Aimbot", Config.Aimbot_Key, function(k) Config.Aimbot_Key = k end)
-AddDropdown(CombatTab, "Parte del cuerpo", {"Head", "HumanoidRootPart", "UpperTorso"}, Config.Aimbot_TargetPart, function(v) Config.Aimbot_TargetPart = v end)
+AddDropdown(CombatTab, "Parte del cuerpo (Aimbot)", {"Head", "HumanoidRootPart", "UpperTorso"}, Config.Aimbot_TargetPart, function(v) Config.Aimbot_TargetPart = v end)
 AddSlider(CombatTab, "Suavidad", 0.01, 1.0, Config.Aimbot_Smoothness, true, function(v) Config.Aimbot_Smoothness = v end)
 AddToggle(CombatTab, "Mostrar FOV", Config.Aimbot_ShowFOV, function(s) Config.Aimbot_ShowFOV = s end)
-AddSlider(CombatTab, "Radio FOV", 5, 500, Config.Aimbot_FOV, false, function(v) Config.Aimbot_FOV = v end)
+AddSlider(CombatTab, "Radio FOV", 5, 800, Config.Aimbot_FOV, false, function(v) Config.Aimbot_FOV = v end)
 
 ToggleCallbacks.ESP = AddToggle(VisualsTab, "ESP General", Config.ESP_Enabled, function(s) Config.ESP_Enabled = s end)
 AddKeybind(VisualsTab, "Tecla ESP", Config.Keys.ESP, function(k) Config.Keys.ESP = k end)
@@ -704,17 +652,11 @@ AddToggle(VisualsTab, "Esqueleto", Config.ESP_Skeleton, function(s) Config.ESP_S
 AddSlider(VisualsTab, "Grosor de líneas", 1, 5, Config.ESP_Thickness, false, function(v) Config.ESP_Thickness = v end)
 AddToggle(VisualsTab, "Iluminación total", Config.Fullbright, function(s) Config.Fullbright = s end)
 
-AddColorPalette(VisualsTab, "Color de Cajas", Config.ESP_BoxColor, function(c) Config.ESP_BoxColor = c end)
-AddColorPalette(VisualsTab, "Color de Nombres", Config.ESP_NameColor, function(c) Config.ESP_NameColor = c end)
-AddColorPalette(VisualsTab, "Color de Líneas", Config.ESP_TracerColor, function(c) Config.ESP_TracerColor = c end)
-
 AddToggle(RageTab, "Ampliar hitboxes (Rage)", Config.Hitbox_Enabled, function(s) Config.Hitbox_Enabled = s end)
 AddToggle(RageTab, "Previsualizar hitboxes", Config.Hitbox_Preview, function(s) Config.Hitbox_Preview = s end)
 AddSlider(RageTab, "Tamaño de hitbox", 1, 50, Config.Hitbox_Size, false, function(v) Config.Hitbox_Size = v end)
 AddToggle(RageTab, "Disparo automático rápido", Config.RapidFire, function(s) Config.RapidFire = s end)
-AddToggle(RageTab, "Redirección de balas", Config.RageBullets, function(s) Config.RageBullets = s end)
 
--- Opciones de Player
 ToggleCallbacks.Speed = AddToggle(PlayerTab, "Velocidad de movimiento", Config.SpeedEnabled, function(s) Config.SpeedEnabled = s end)
 AddKeybind(PlayerTab, "Tecla de velocidad", Config.Keys.Speed, function(k) Config.Keys.Speed = k end)
 AddSlider(PlayerTab, "Valor de velocidad", 16, 800, Config.WalkSpeed, false, function(v) Config.WalkSpeed = v end)
@@ -737,13 +679,11 @@ ToggleCallbacks.Fly = AddToggle(PlayerTab, "Vuelo libre", Config.FlyEnabled, fun
 AddKeybind(PlayerTab, "Tecla de vuelo", Config.Keys.Fly, function(k) Config.Keys.Fly = k end)
 AddSlider(PlayerTab, "Velocidad de vuelo", 10, 500, Config.FlySpeed, false, function(v) Config.FlySpeed = v end)
 
--- Orbit Controls (Fijar objetivo al presionar la tecla)
 AddToggle(PlayerTab, "Orbit Target (Fijar con tecla)", Config.OrbitEnabled, function(s) Config.OrbitEnabled = s end)
 AddKeybind(PlayerTab, "Tecla de Orbit", Config.Keys.Orbit, function(k) Config.Keys.Orbit = k end)
 AddSlider(PlayerTab, "Velocidad de Orbit", 1, 50, Config.OrbitSpeed, false, function(v) Config.OrbitSpeed = v end)
 AddSlider(PlayerTab, "Radio de Orbit (Cerca/Lejos)", 0.1, 15, Config.OrbitRadius, true, function(v) Config.OrbitRadius = v end)
 
--- Players Tab Logic
 local PlayersScroll = Instance.new("ScrollingFrame")
 PlayersScroll.Size = UDim2.new(1, 0, 1, 0)
 PlayersScroll.BackgroundTransparency = 1
@@ -880,16 +820,119 @@ table.insert(Connections, Players.PlayerAdded:Connect(RefreshPlayerList))
 table.insert(Connections, Players.PlayerRemoving:Connect(RefreshPlayerList))
 
 AddKeybind(ConfigTab, "Tecla del menú", Config.MenuKey, function(k) Config.MenuKey = k end)
-AddColorPalette(ConfigTab, "Color principal", Config.AccentColor, function(c) 
-    Config.AccentColor = c 
-    UpdateUIColors()
-end)
 AddButton(ConfigTab, "Cerrar / Destruir script", function()
     UnloadScript()
 end)
 
 -- =================================================================
--- BUCLE PRINCIPAL & ORBIT LOGIC (FIJADO AUTOMÁTICO POR TECLA)
+-- PESTAÑA PRESETS (GESTOR DE CONFIGURACIONES INTERACTIVO)
+-- =================================================================
+local SelectedPresetName = "configuracion1"
+
+local ConfigNameBox = Instance.new("TextBox")
+ConfigNameBox.Size = UDim2.new(1, -10, 0, 36)
+ConfigNameBox.BackgroundColor3 = Color3.fromRGB(22, 20, 28)
+ConfigNameBox.BorderSizePixel = 0
+ConfigNameBox.Text = SelectedPresetName
+ConfigNameBox.PlaceholderText = "Nombre del preset..."
+ConfigNameBox.TextColor3 = Color3.fromRGB(220, 220, 235)
+ConfigNameBox.PlaceholderColor3 = Color3.fromRGB(90, 85, 110)
+ConfigNameBox.Font = Enum.Font.Code
+ConfigNameBox.TextSize = 11
+ConfigNameBox.Parent = ColorsTab
+
+local BoxStroke = Instance.new("UIStroke")
+BoxStroke.Color = Color3.fromRGB(35, 30, 48)
+BoxStroke.Thickness = 1
+BoxStroke.Parent = ConfigNameBox
+
+ConfigNameBox:GetPropertyChangedSignal("Text"):Connect(function()
+    SelectedPresetName = ConfigNameBox.Text
+end)
+
+local FilesScroll = Instance.new("ScrollingFrame")
+FilesScroll.Size = UDim2.new(1, -10, 0, 150)
+FilesScroll.BackgroundColor3 = Color3.fromRGB(18, 16, 23)
+FilesScroll.BorderSizePixel = 0
+FilesScroll.ScrollBarThickness = 3
+FilesScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+FilesScroll.Parent = ColorsTab
+
+local FilesLayout = Instance.new("UIListLayout")
+FilesLayout.Padding = UDim.new(0, 4)
+FilesLayout.Parent = FilesScroll
+
+FilesLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    FilesScroll.CanvasSize = UDim2.new(0, 0, 0, FilesLayout.AbsoluteContentSize.Y + 10)
+end)
+
+local function RefreshPresetList()
+    for _, child in ipairs(FilesScroll:GetChildren()) do
+        if child:IsA("TextButton") then child:Destroy() end
+    end
+    
+    local success, files = pcall(function() return listfiles(FolderName) end)
+    if success and files then
+        for _, file in ipairs(files) do
+            local name = file:match("([^/\\]+)%.json$")
+            if name then
+                local FileBtn = Instance.new("TextButton")
+                FileBtn.Size = UDim2.new(1, -6, 0, 30)
+                FileBtn.BackgroundColor3 = Color3.fromRGB(25, 22, 32)
+                FileBtn.BorderSizePixel = 0
+                FileBtn.Text = name
+                FileBtn.TextColor3 = Color3.fromRGB(200, 200, 215)
+                FileBtn.Font = Enum.Font.Code
+                FileBtn.TextSize = 11
+                FileBtn.Parent = FilesScroll
+
+                FileBtn.MouseButton1Click:Connect(function()
+                    SelectedPresetName = name
+                    ConfigNameBox.Text = name
+                end)
+            end
+        end
+    end
+end
+
+RefreshPresetList()
+
+AddButton(ColorsTab, "Guardar Configuración", function()
+    if SelectedPresetName and SelectedPresetName ~= "" then
+        pcall(function()
+            local data = {
+                WalkSpeed = Config.WalkSpeed,
+                JumpPower = Config.JumpPower,
+                Gravity = Config.Gravity,
+                Aimbot_FOV = Config.Aimbot_FOV,
+                OrbitSpeed = Config.OrbitSpeed,
+                OrbitRadius = Config.OrbitRadius
+            }
+            writefile(FolderName .. "/" .. SelectedPresetName .. ".json", HttpService:JSONEncode(data))
+            RefreshPresetList()
+        end)
+    end
+end)
+
+AddButton(ColorsTab, "Cargar Configuración", function()
+    if SelectedPresetName and SelectedPresetName ~= "" then
+        pcall(function()
+            local path = FolderName .. "/" .. SelectedPresetName .. ".json"
+            if isfile(path) then
+                local decoded = HttpService:JSONDecode(readfile(path))
+                if decoded.WalkSpeed then Config.WalkSpeed = decoded.WalkSpeed end
+                if decoded.JumpPower then Config.JumpPower = decoded.JumpPower end
+                if decoded.Gravity then Config.Gravity = decoded.Gravity end
+                if decoded.Aimbot_FOV then Config.Aimbot_FOV = decoded.Aimbot_FOV end
+                if decoded.OrbitSpeed then Config.OrbitSpeed = decoded.OrbitSpeed end
+                if decoded.OrbitRadius then Config.OrbitRadius = decoded.OrbitRadius end
+            end
+        end)
+    end
+end)
+
+-- =================================================================
+-- BUCLE PRINCIPAL & MOVIMIENTO
 -- =================================================================
 local flyKeys = {W = false, S = false, A = false, D = false, Space = false, Shift = false}
 table.insert(Connections, UserInputService.InputBegan:Connect(function(input, gp)
@@ -912,7 +955,6 @@ table.insert(Connections, UserInputService.InputEnded:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.LeftShift then flyKeys.Shift = false end
 end))
 
--- Función para encontrar al jugador más cercano al mouse en el momento de pulsar la tecla
 local function GetClosestPlayerToMouse()
     local mousePos = UserInputService:GetMouseLocation()
     local closestPlayer = nil
@@ -957,7 +999,6 @@ table.insert(Connections, RunService.RenderStepped:Connect(function(dt)
                 end
             end
 
-            -- Lógica de Orbit Automática con el objetivo fijado
             if Config.OrbitEnabled and Config.OrbitTarget and Config.OrbitTarget.Character and Config.OrbitTarget.Character:FindFirstChild("HumanoidRootPart") and rootPart then
                 local targetHrp = Config.OrbitTarget.Character.HumanoidRootPart
                 orbitAngle = orbitAngle + (Config.OrbitSpeed * dt)
@@ -1020,18 +1061,23 @@ table.insert(Connections, RunService.RenderStepped:Connect(function(dt)
 end))
 
 -- =================================================================
--- AIMBOT
+-- AIMBOT MEJORADO (STICKY TARGET LOCK)
 -- =================================================================
 local function GetTarget()
     local mousePos = UserInputService:GetMouseLocation()
 
+    -- Mantener el blanco bloqueado si ya está seleccionado y sigue vivo
     if Config.LockedTarget and Config.LockedTarget.Character and Config.LockedTarget.Character:FindFirstChild(Config.Aimbot_TargetPart) then
-        local part = Config.LockedTarget.Character[Config.Aimbot_TargetPart]
-        local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
-        if onScreen then
-            local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-            if dist <= Config.Aimbot_FOV + 100 then
-                return Config.LockedTarget
+        local humanoid = Config.LockedTarget.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid and humanoid.Health > 0 then
+            local part = Config.LockedTarget.Character[Config.Aimbot_TargetPart]
+            local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+            if onScreen then
+                local dist = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                -- Ampliamos el rango de retención para evitar que se suelte al moverse rápido
+                if dist <= Config.Aimbot_FOV * 2.5 then
+                    return Config.LockedTarget
+                end
             end
         end
     end
@@ -1227,7 +1273,7 @@ table.insert(Connections, RunService.RenderStepped:Connect(function()
                         local la = player.Character:FindFirstChild("LeftUpperArm") or player.Character:FindFirstChild("Left Arm")
                         local ra = player.Character:FindFirstChild("RightUpperArm") or player.Character:FindFirstChild("Right Arm")
                         local ll = player.Character:FindFirstChild("LeftUpperLeg") or player.Character:FindFirstChild("Left Leg")
-                        local rl = player.Character:FindFirstChild("RightUpperLeg") or player.Character:FindFirstChild("Right Leg")
+                        local rl = player.Character:FindFirstChild("RightUpperLeg") or player.Character:FindFirstChild("Right Arm")
 
                         local function drawBone(boneLine, p1, p2)
                             if p1 and p2 then
